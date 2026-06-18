@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayday — Pipeline Review</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f8f8f7;--bg3:#f1f0ed;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#9b9b96;
+  --border:#e5e4e0;--border2:#d0cfc9;
+  --blue:#1a6fba;--blue-bg:#eaf2fb;
+  --green:#2d7d46;--green-bg:#eaf5ee;
+  --amber:#a05c00;--amber-bg:#fef3e2;
+  --red:#c0392b;--red-bg:#fdecea;
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
+
+/* Auth */
+.auth{position:fixed;inset:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;z-index:200}
+.auth-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:32px;width:340px;text-align:center}
+.auth-logo{font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.auth-logo i{color:var(--blue)}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+.auth-input{width:100%;border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;letter-spacing:2px}
+.auth-input:focus{outline:none;border-color:var(--blue)}
+.auth-btn{width:100%;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);padding:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.auth-btn:hover{opacity:.85}
+.auth-error{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* Topbar */
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);height:52px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.brand i{color:var(--blue)}
+.brand-sub{font-size:12px;color:var(--text2);font-weight:400}
+.topbar-right{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:12px}
+.last-update{font-size:11px;color:var(--text3)}
+
+/* Main */
+.main{max-width:1100px;margin:0 auto;padding:24px}
+.page-header{margin-bottom:24px}
+.page-title{font-size:20px;font-weight:600;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px}
+.kpi-value{font-size:24px;font-weight:700;margin-bottom:2px}
+.kpi-label{font-size:12px;color:var(--text2)}
+
+/* Deal cards */
+.deal-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden}
+.deal-header{padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:background .15s}
+.deal-header:hover{background:var(--bg2)}
+.deal-company{font-size:16px;font-weight:600;margin-bottom:4px}
+.deal-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.deal-meta-item{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:3px}
+.deal-amount{font-size:20px;font-weight:700;text-align:right;white-space:nowrap}
+.deal-amount-label{font-size:11px;color:var(--text3)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-gray{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+
+/* Score bar */
+.score-bar{height:4px;background:var(--bg3);border-radius:2px;width:140px;overflow:hidden;margin-top:6px}
+.score-fill{height:100%;background:var(--text);border-radius:2px}
+.score-label{font-size:11px;color:var(--text3);margin-bottom:2px}
+
+/* Deal body */
+.deal-body{border-top:1px solid var(--border);display:none}
+.deal-body.open{display:block}
+.deal-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 20px}
+.deal-tab{padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.deal-tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.deal-panel{padding:20px;display:none}
+.deal-panel.active{display:block}
+
+/* Sections */
+.sec{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden}
+.sec-head{padding:11px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.sec-head:hover{background:var(--bg3)}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2)}
+.sec-body{padding:16px}
+
+/* Snap grid */
+.snap-row{display:grid;grid-template-columns:160px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.snap-row:last-child{border-bottom:none}
+.snap-key{color:var(--text2);font-size:12px;padding-top:2px}
+
+/* MEDDPICC */
+.medc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.medc-item{border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.medc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.medc-status{font-size:16px}
+.medc-name{font-size:12px;font-weight:600}
+.medc-sub{font-size:11px;color:var(--text2)}
+.medc-detail{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* Stakeholders */
+.stk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.stk-card{border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.stk-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.stk-role{font-size:11px;color:var(--text2);margin-bottom:8px}
+.stk-badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.stk-reason{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5}
+
+/* Coaching */
+.coach-block{border:1px solid var(--border);border-radius:var(--rl);padding:14px;margin-bottom:10px;border-left:3px solid var(--border2)}
+.coach-block.success{border-left-color:var(--green)}
+.coach-block.warning{border-left-color:var(--amber)}
+.coach-block.info{border-left-color:var(--blue)}
+.coach-block.danger{border-left-color:var(--red)}
+.coach-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.coach-block.success .coach-title{color:var(--green)}
+.coach-block.warning .coach-title{color:var(--amber)}
+.coach-block.info .coach-title{color:var(--blue)}
+.coach-block.danger .coach-title{color:var(--red)}
+.coach-item{font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;line-height:1.5}
+.coach-item:last-child{border-bottom:none}
+.coach-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:currentColor;margin-top:6px}
+
+/* Next steps */
+.ns-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:var(--r);display:inline-block;margin-bottom:6px}
+.ns-label.imm{background:var(--red-bg);color:var(--red)}
+.ns-label.ct{background:var(--amber-bg);color:var(--amber)}
+.ns-label.mt{background:var(--bg3);color:var(--text2)}
+.ns-item{font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.ns-item:last-child{border-bottom:none}
+.ns-group{margin-bottom:14px}
+
+/* Meeting */
+.meet-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.meet-item{background:var(--bg2);border-radius:var(--r);padding:10px 12px}
+.meet-label{font-size:11px;color:var(--text2);margin-bottom:3px}
+.meet-val{font-size:13px}
+
+/* Readonly badge */
+.readonly-badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)}
+
+@media(max-width:600px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .medc-grid{grid-template-columns:1fr 1fr}
+  .meet-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Auth screen -->
+<div class="auth" id="auth">
+  <div class="auth-box">
+    <div class="auth-logo"><i class="ti ti-bolt"></i> Mayday Deal Reviewer</div>
+    <div class="auth-sub">Pipeline Review — Accès restreint</div>
+    <input type="password" class="auth-input" id="auth-input" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkAuth()">
+    <button class="auth-btn" onclick="checkAuth()">Accéder</button>
+    <div class="auth-error" id="auth-error">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+<div class="topbar">
+  <div class="brand"><i class="ti ti-bolt"></i> Mayday Deal Reviewer <span class="brand-sub">Pipeline Review</span></div>
+  <div class="topbar-right">
+    <span class="readonly-badge"><i class="ti ti-eye" style="font-size:12px"></i> Lecture seule</span>
+    <span class="last-update" id="last-update"></span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div class="page-title">Pipeline Mayday</div>
+    <div class="page-sub" id="pipeline-sub"></div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div id="deals-list"></div>
+</div>
+</div>
+
+<script>
+const PASSWORD = 'mayday2026';
+const DEALS = [
+  {
+    "id": "drager",
+    "company": "Dräger",
+    "amount": 30240,
+    "stage": "Business Case",
+    "closing_date": "2026-09-30",
+    "hubspot_url": "https://app-eu1.hubspot.com/contacts/4148856/record/0-3/505033841864",
+    "created_at": "2026-06-17T00:00:00.000Z",
+    "updated_at": "2026-06-18T08:22:08.992Z",
+    "transcripts": [
+      {
+        "id": "164704",
+        "label": "Call discovery - Mohamed Ali / Delphine",
+        "type": "Discovery",
+        "date": "2025-02-XX"
+      },
+      {
+        "id": "175991",
+        "label": "Démo Mayday - Ugo / Delphine",
+        "type": "Demo",
+        "date": "2025-03-13"
+      },
+      {
+        "id": "203512",
+        "label": "Call tripartite Mayday + mc2i - Ugo / Delphine / Mathilde / Maxime",
+        "type": "Tripartite",
+        "date": "2025-04-XX"
+      }
+    ],
+    "todos": [
+      {
+        "id": "g-admin",
+        "label": "Admin",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t1",
+            "label": "Opportunité créée dans HubSpot avec tous les champs renseignés",
+            "done": true
+          },
+          {
+            "id": "t2",
+            "label": "MEDDPICC complété",
+            "done": false
+          },
+          {
+            "id": "t3",
+            "label": "Mapping de tous les départements et interlocuteurs",
+            "done": false
+          }
+        ]
+      },
+      {
+        "id": "g-deal",
+        "label": "Deal",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t4",
+            "label": "Champion identifié",
+            "done": true
+          },
+          {
+            "id": "t5",
+            "label": "Interlocuteurs et décisionnaires ajoutés sur LinkedIn",
+            "done": false
+          },
+          {
+            "id": "t6",
+            "label": "Invitation aux événements marketing",
+            "done": false
+          },
+          {
+            "id": "t7",
+            "label": "Décisionnaire identifié",
+            "done": true,
+            "subs": [
+              {
+                "id": "t7a",
+                "label": "Le décisionnaire a-t-il été contacté ?",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "t8",
+            "label": "Signataire identifié",
+            "done": false,
+            "subs": [
+              {
+                "id": "t8a",
+                "label": "Le signataire a-t-il été contacté ?",
+                "done": false
+              },
+              {
+                "id": "t8b",
+                "label": "Le signataire est-il sensibilisé au projet ?",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "t9",
+            "label": "Détracteur identifié",
+            "done": false,
+            "subs": [
+              {
+                "id": "t9a",
+                "label": "Le détracteur a-t-il été adressé ?",
+                "done": false
+              }
+            ]
+          },
+          {
+            "id": "t10",
+            "label": "Rencontre physique faite",
+            "done": false
+          },
+          {
+            "id": "t11",
+            "label": "Compétition identifiée",
+            "done": false
+          },
+          {
+            "id": "t12",
+            "label": "Partenaires activés",
+            "done": true
+          },
+          {
+            "id": "t13",
+            "label": "Executive alignment fait",
+            "done": false
+          }
+        ]
+      }
+    ],
+    "generated": {
+      "snapshot": {
+        "montant": "2 520 EUR MRR",
+        "licences": "~60 licences (60 collaborateurs service client)",
+        "produits": "Mayday Knowledge + IA (Academy et Selfcare identifiés comme intérêts secondaires potentiels)",
+        "populations": "Service client Dräger France - 60 agents répartis sur 2 sites (Antony + Strasbourg), 4-5 managers, 2 divisions (Médical + Sécurité), 2 activités (Vente + Service/Maintenance)",
+        "stage": "Démo faite + call tripartite Mayday / mc2i / Dräger - en attente du chiffrage mc2i et du business case Mayday",
+        "probability": "35%",
+        "timeline": "Objectif initiation projet avant septembre 2025, livrables V1 KB acceptables jusqu'en décembre 2025. Compelling event : intégration de 2 nouvelles personnes le 15 juin 2025.",
+        "compelling_event": "Intégration de 2 nouveaux collaborateurs le 15 juin 2025 sans base de connaissances existante. Turnover difficile sur certains pôles. Problème de formation identifié dès la 3e semaine d'une nouvelle recrue.",
+        "solutions_actuelles": "SAP (ERP central), CRM iCare sur Microsoft Dynamics (déployé il y a 2 mois, en pilote), téléphonie Imagicle (non interfacée au CRM), SharePoint (usage limité), Outlook. Aucune base de connaissances formalisée - tout par oral.",
+        "competition": "Non identifiée à ce stade. Dräger évaluait initialement un cabinet de conseil pur (budget 5 000 EUR) sans solution logicielle."
+      },
+      "prochain_meeting": {
+        "date": "À planifier - semaine du 15 avril 2025 (jeudi 17 ou 18 avril, 14h30-15h30)",
+        "participants": "Ugo Muller (Mayday), Delphine Moutoussamy (Dräger), Victor (mc2i - SPOC, backup de Mathilde)",
+        "topic": "Restitution business case + chiffrage Mayday / Chiffrage mc2i en parallèle",
+        "objectif": "Obtenir un go/no-go de Delphine pour présentation à son DG. Clarifier l'enveloppe budgétaire globale (Mayday + mc2i) et les jalons de validation interne.",
+        "status": "Invite envoyée par Ugo - à confirmer côté mc2i avec Victor"
+      },
+      "stakeholders": [
+        {
+          "nom": "Delphine Moutoussamy",
+          "role": "Directrice du Service Client - Dräger France",
+          "influence": "Champion",
+          "position": "Favorable",
+          "linkedin": "",
+          "raison": "Porteuse du projet depuis son arrivée il y a un an. Convaincue par le produit Mayday. Bloquée uniquement par le besoin de ressources pour la création de contenu. Forte urgence perçue sur la formalisation des process."
+        },
+        {
+          "nom": "DG Dräger France (peut être Yves Le Gouguec)",
+          "role": "Directeur Général - Décisionnaire budgétaire",
+          "influence": "Décideur",
+          "position": "Neutre",
+          "linkedin": "https://www.linkedin.com/in/yves-le-gouguec-41b37525/",
+          "raison": "Déjà informé du projet par Delphine. Budget initial de 5 000 EUR prévu pour une prestation de conseil seule. Pas encore exposé à l'enveloppe Mayday + mc2i. Go/no-go final lui appartient."
+        },
+        {
+          "nom": "Maxime Bontemps",
+          "role": "Manager - Offre Expérience Client & Marketing - mc2i",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Partenaire mc2i actif sur le deal. Impliqué dans le call tripartite. Anime le centre d'expertise CX de mc2i. Doit fournir un chiffrage de la prestation de création de contenu."
+        },
+        {
+          "nom": "Victor (mc2i)",
+          "role": "SPOC mc2i sur le périmètre Dräger",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Interlocuteur principal mc2i (Mathilde en backup). Sera présent sur le prochain call. A initié le projet avec Mathilde."
+        },
+        {
+          "nom": "Mathilde Delhomme",
+          "role": "Senior Manager - Expérience Client & Marketing - mc2i",
+          "linkedin": "",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "raison": "Backup de Victor sur le deal. A participé au call tripartite. Connait Mayday (déployé chez La Poste). Bonne compréhension du contexte Dräger."
+        }
+      ],
+      "meddpicc": {
+        "M": {
+          "status": "🟡",
+          "detail": "Pas de métriques chiffrées formalisées. Éléments qualitatifs forts : taux de décroché passé de 68% à 86%, onboarding défaillant (3 semaines sans comprendre le poste), formation 100% orale, turnover difficile sur certains pôles. Business case Mayday pas encore présenté à Delphine."
+        },
+        "E": {
+          "status": "🟡",
+          "detail": "DG Dräger France identifié comme décisionnaire budgétaire. Delphine a confirmé qu'il est informé du projet et qu'il donne un go/no-go. Pas encore de contact direct Mayday avec le DG. Budget initial DG : 5 000 EUR pour une prestation seule - l'enveloppe Mayday + mc2i n'a pas encore été discutée avec lui."
+        },
+        "D1": {
+          "status": "🟡",
+          "detail": "Critères exprimés : besoin de ressources pour créer le contenu (bloquant), expertise process service client, capacité à interviewer les collaborateurs et formaliser les workflows. Mayday coché fonctionnellement. L'intégration CRM (iCare/Dynamics) est mentionnée comme nécessaire. Critères formels de sélection non documentés."
+        },
+        "D2": {
+          "status": "🟡",
+          "detail": "Process de décision simple : Delphine présente à son DG, go/no-go DG. Mais jalons intermédiaires flous. Prochaine étape : Delphine reçoit chiffrage Mayday + mc2i, puis arbitrage DG. Pas de comité achat, pas de procurement identifié, pas de DSI impliquée à ce stade."
+        },
+        "P": {
+          "status": "❌",
+          "detail": "Aucun élément sur le paper process : contractualisation, délais légaux, service achat, validation juridique. Non abordé dans les calls."
+        },
+        "I": {
+          "status": "✅",
+          "detail": "Douleur centrale très bien qualifiée : 0 base de connaissances formalisée, formation 100% orale depuis 20 ans, process non écrits, onboarding défaillant, 2 nouvelles recrues intégrées le 15 juin sans support, turnover sur certains pôles, managers opérationnels non disponibles pour former. Delphine manque de ressources internes pour créer le contenu."
+        },
+        "C1": {
+          "status": "🟡",
+          "detail": "Delphine est un champion fort : elle initie toutes les réunions, a présenté le projet à son DG, est convaincue par Mayday. Mais elle n'a pas encore défendu l'enveloppe budgétaire Mayday + mc2i auprès du DG. Risque : l'écart entre 5 000 EUR (budget initial) et le budget réel Mayday + mc2i peut fragiliser son rôle de champion."
+        },
+        "C2": {
+          "status": "❌",
+          "detail": "Pas de concurrent logiciel identifié. Dräger partait initialement sur une prestation de conseil seule (cabinet externe, 5 000 EUR), sans envisager de solution logicielle. Le vrai concurrent est le statu quo + un cabinet de conseil pur. Aucune solution alternative à Mayday n'a été mentionnée."
+        }
+      },
+      "dernier_call": {
+        "date": "Semaine du 5 mai 2025 (approximatif - séminaire entreprise la semaine suivante)",
+        "duree": "~58 minutes",
+        "participants": "Ugo Muller (Mayday), Delphine Moutoussamy (Dräger), Maxime Bontemps (mc2i), Mathilde Delhomme (mc2i - backup Victor)",
+        "sujets": "Présentation mc2i, recontextualisation du projet Dräger, état des lieux outils et process, échéance septembre, jalons décision, budget, prochaines étapes",
+        "points_cles": "mc2i dispose de l'expertise pour interviewer les collaborateurs et formaliser les process directement dans Mayday. Delphine confirme l'urgence projet (initiation avant septembre). Budget initial DG = 5 000 EUR pour prestation seule, sans solution logicielle : enveloppe à réviser. DG informé du projet mais pas encore exposé au budget Mayday + mc2i. Delphine intègre 2 nouveaux collaborateurs le 15 juin. mc2i a validé avoir assez d'éléments pour chiffrer.",
+        "next_steps": "1. Ugo envoie un mail récap à Delphine avec tout ce qui a été dit. 2. Ugo bloque un créneau avec Delphine pour présenter le business case + chiffrage Mayday (semaine du 15, jeudi 17/18 avril, 14h30-15h30). 3. mc2i (Victor) organise en parallèle un créneau pour présenter son chiffrage. 4. Delphine présente ensuite l'enveloppe globale à son DG pour go/no-go."
+      },
+      "next_steps": {
+        "immediat": [
+          "Envoyer le mail récap à Delphine avec les éléments clés du call tripartite",
+          "Confirmer le créneau business case + chiffrage Mayday avec Delphine (jeudi semaine du 15, 14h30)",
+          "Aligner Victor (mc2i) sur le même créneau ou créneau parallèle"
+        ],
+        "court_terme": [
+          "Préparer et pitcher le business case Mayday à Delphine : quantifier l'impact sur le temps de formation, les recontacts, le turnover",
+          "S'assurer que mc2i fournit son chiffrage en parallèle ou lors du même meeting",
+          "Identifier et contacter le DG directement (executive alignment) avant ou après la présentation à Delphine"
+        ],
+        "moyen_terme": [
+          "Obtenir le go/no-go du DG sur l'enveloppe Mayday + mc2i",
+          "Cadrer le modèle tripartite Dräger / Mayday / mc2i : rôles, livrables, planning",
+          "Viser une signature et un kick-off avant fin juin pour tenir l'objectif septembre"
+        ]
+      },
+      "coaching": {
+        "bien_marche": [
+          "Activation du partenaire mc2i : excellente initiative pour répondre au besoin de création de contenu, bloquant principal du deal",
+          "Qualification de la douleur très profonde : Ugo et Mohamed ont bien extrait les irritants (onboarding, formation orale, 0 process écrit)",
+          "Gestion du call tripartite : bonne orchestration, Ugo a bien structuré les deux phases (documentation mc2i / outil Mayday)",
+          "Compelling event bien identifié : les 2 nouvelles recrues du 15 juin et l'objectif septembre",
+          "Next step obtenu avec date sur le business case"
+        ],
+        "a_ameliorer": [
+          "Le budget est un risque majeur non adressé : Delphine avait 5 000 EUR en tête pour une prestation seule. Le gap avec Mayday + mc2i peut bloquer le DG. Il faut préparer Delphine à défendre un budget plus large AVANT qu'elle aille voir son DG.",
+          "Le DG n'a pas encore été impliqué directement : on approche du moment décisionnel sans executive alignment. Risque de surprise budgétaire en dernière minute.",
+          "La compétition n'a pas été creusée : Dräger a-t-il regardé d'autres solutions ? Un cabinet de conseil seul reste une option crédible à 5 000 EUR.",
+          "Le paper process est inconnu : service achat, DSI, juriste ? Sur un deal avec un partenaire, le contrat peut être complexe.",
+          "L'urgence septembre a été acceptée par Delphine comme flexible ('si après septembre, ça se fait après') : le compelling event doit être réancré sur les 2 recrutements du 15 juin."
+        ],
+        "actions_prioritaires": [
+          "Préparer Delphine à défendre le budget Mayday + mc2i auprès de son DG : lui donner les arguments ROI avant le meeting DG, pas seulement un chiffre",
+          "Organiser une réunion avec le DG (executive alignment Mayday + DG) pour éviter que Delphine porte seule le budget",
+          "Clarifier le paper process : qui signe côté Dräger, y a-t-il un service achat ou un DSI à impliquer ?",
+          "Ancrer le deal sur le compelling event 15 juin : 2 nouvelles recrues sans base de connaissances = coût immédiat et mesurable"
+        ],
+        "risques": [
+          "Budget gap : DG avait 5 000 EUR en tête, enveloppe Mayday + mc2i sera significativement plus élevée. Risque de no-go ou de demande de réduction forte.",
+          "Delphine seule pour défendre le budget : sans executive alignment direct Mayday / DG, tout repose sur Delphine. Si elle perd la bataille budgétaire, le deal tombe.",
+          "Timeline molle : Delphine a dit que septembre n'est pas bloquant. Sans urgence ferme, le deal peut glisser en Q4 ou disparaître.",
+          "Dépendance au partenaire mc2i : si mc2i ne propose pas une offre cohérente ou que son chiffrage est trop élevé, cela peut faire capoter l'ensemble du projet.",
+          "Complexité contractuelle tripartite : modèle Mayday + mc2i jamais fait, risque de complexité sur qui signe quoi avec Dräger."
+        ],
+        "questions_prochain_call": [
+          "Delphine, quand vous présentez ce projet à votre DG, quel est le budget global qu'il a en tête aujourd'hui ? Et qu'est-ce qui pourrait le convaincre de l'augmenter ?",
+          "Est-ce qu'on peut organiser une réunion à trois avec votre DG, vous et moi, pour qu'on lui présente directement le ROI et le chiffrage ? Ca lui facilitera la décision.",
+          "Sur le paper process : c'est votre DG qui signe, ou est-ce qu'il y a un service achat ou une DSI à impliquer dans la validation ?",
+          "Les 2 personnes que vous intégrez le 15 juin, si elles arrivent sans base de connaissances, quel est le coût concret pour vous en termes de temps manager et de qualité de service ?",
+          "Si mc2i et Mayday vous remettent leurs chiffrages cette semaine, dans quel délai vous pouvez avoir une réponse de votre DG ?"
+        ]
+      }
+    },
+    "notes": null
+  },
+  {
+    "id": "fulli-mobilis",
+    "company": "Fulli (Mobilis / groupe APRR-Eiffage)",
+    "amount": 120000,
+    "stage": "Proposition",
+    "closing_date": "2025-09-18",
+    "hubspot_url": "https://app-eu1.hubspot.com/contacts/4148856/record/0-3/499552006338",
+    "created_at": "2025-05-26T00:00:00Z",
+    "updated_at": "2026-06-18T08:07:48.908Z",
+    "transcripts": [],
+    "todos": [
+      {
+        "id": "g-admin",
+        "label": "Admin",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t1",
+            "label": "Opportunité créée dans HubSpot avec tous les champs renseignés",
+            "checked": true
+          },
+          {
+            "id": "t2",
+            "label": "MEDDPICC complété",
+            "checked": true
+          },
+          {
+            "id": "t3",
+            "label": "Mapping de tous les départements et interlocuteurs",
+            "checked": true
+          }
+        ]
+      },
+      {
+        "id": "g-deal",
+        "label": "Deal",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t4",
+            "label": "Champion identifié",
+            "checked": true,
+            "notes": "Nathalie Franchini"
+          },
+          {
+            "id": "t5",
+            "label": "Interlocuteurs et décisionnaires ajoutés sur LinkedIn"
+          },
+          {
+            "id": "t6",
+            "label": "Invitation aux événements marketing",
+            "checked": true
+          },
+          {
+            "id": "t7",
+            "label": "Décisionnaire identifié",
+            "subs": [
+              {
+                "id": "t7a",
+                "label": "Le décisionnaire a-t-il été contacté ?"
+              }
+            ],
+            "notes": "Jacques Leca (DG) et Véronique Tallon (Présidente)"
+          },
+          {
+            "id": "t8",
+            "label": "Signataire identifié",
+            "subs": [
+              {
+                "id": "t8a",
+                "label": "Le signataire a-t-il été contacté ?"
+              },
+              {
+                "id": "t8b",
+                "label": "Le signataire est-il sensibilisé au projet ?"
+              }
+            ]
+          },
+          {
+            "id": "t9",
+            "label": "Détracteur identifié",
+            "subs": [
+              {
+                "id": "t9a",
+                "label": "Le détracteur a-t-il été adressé ?"
+              }
+            ]
+          },
+          {
+            "id": "t10",
+            "label": "Rencontre physique faite"
+          },
+          {
+            "id": "t11",
+            "label": "Compétition identifiée",
+            "notes": "Compétiteurs à donner à Nathalie qui n'a pas fait de benchmark (anticipation de la demande)"
+          },
+          {
+            "id": "t12",
+            "label": "Partenaires activés"
+          },
+          {
+            "id": "t13",
+            "label": "Executive alignment fait"
+          }
+        ]
+      }
+    ],
+    "generated": {
+      "snapshot": {
+        "montant": "2 400 € MRR estimé (scénario initial 240 users Knowledge + Academy + AI sans Selfcare ~12 500 €/mois ; scénario retenu ~200 users, périmètre réduit à affiner). ARR estimé ~28 800 €. Build one-shot 23 000 €.",
+        "licences": "240 users cible (Nathalie propose 200 ; scénario RCI strict : 107 agents relation client + 30 OnePilot = ~130-170 ; scénario BU max : 240). À figer après arbitrage interne.",
+        "produits": "Mayday Knowledge + Mayday Academy + Mayday AI (option 13 €/user/mois). Selfcare : envisagé mais poussé en optionnel à 1 400 €/mois pour ~100 users.",
+        "populations": "Agents CRC internes (~107), encadrants, équipe BU (~40), externalisation OnePilot (~30 positions/jour). Centres logistiques exclus.",
+        "stage": "Business Case présenté, pricing partagé. Validation interne en cours avant présentation direction (Jacques Leca DG + Véronique présidente Mobilis). Achats (Jérémy Minja) à intégrer.",
+        "probability": "35%",
+        "timeline": "Go de la direction espéré fin juin 2025. Contractualisation juillet 2025. Déploiement 3-4 mois. Cible : KB opérationnelle fin septembre 2025.",
+        "compelling_event": "Filialisation de Mobilis (jan 2025) : recrée intégralement son CRC omnicanal, se sépare de la maison mère APRR. Certification ISO 9001 en septembre 2025 (pas un prérequis strict mais levier d'urgence). Passation imminente de Stéphanie Blanchard (retraite dans ~4 mois).",
+        "solutions_actuelles": "Salesforce Knowledge (Einstein POC non déployé), Confluence (usage BU/IT interne uniquement, non accessible aux CRC), aucun outil KB structuré pour les agents. OnePilot (BPO) a sa propre KB interne.",
+        "competition": "Salesforce Einstein Knowledge (interne, risque de statu quo fort), Confluence (perçu comme outil IT non adapté au CRC). Pas de concurrent KB direct identifié. Risque principal : statu quo / Salesforce Knowledge."
+      },
+      "prochain_meeting": {
+        "date": "Fin juin 2026 (à planifier avant départs congés)",
+        "participants": "Nathalie Franchini, Thomas Delestre, Ugo Muller (Mayday). Présence possible : Jacques Leca, Véronique (présidente).",
+        "topic": "Présentation direction : business case ROI coût d'inaction + périmètre projet + proposition commerciale affinée",
+        "objectif": "Obtenir le go de Jacques Leca (DG) et Véronique (présidente) pour contractualisation en juillet. Neutraliser les objections achats (Jérémy Minja).",
+        "status": "À planifier d'urgence. Nathalie doit organiser la réunion interne en mai pour préparer la stratégie de présentation à la direction."
+      },
+      "stakeholders": [
+        {
+          "nom": "Nathalie Franchini",
+          "role": "Directrice Relation Client / BU Mobilis - pilote du projet",
+          "influence": "Champion",
+          "position": "Favorable",
+          "linkedin": "https://www.linkedin.com/in/nathaliefranchini/",
+          "raison": "Convaincue de la solution, pilote le projet en interne, co-construit le business case avec l'AE. Gère la stratégie de présentation à la direction."
+        },
+        {
+          "nom": "Stéphanie Blanchard",
+          "role": "Responsable CRC (départ en retraite dans ~4 mois)",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Portait le projet depuis le contact initial (2023). Convaincue. Risque : son départ en retraite fragilise le portage interne."
+        },
+        {
+          "nom": "Alexandra Erb",
+          "role": "Opérations / Relation Client - contributrice projet",
+          "linkedin": "",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "raison": "Active dans les calls, pose les bonnes questions techniques. Favorable mais pragmatique."
+        },
+        {
+          "nom": "Christian Carré",
+          "role": "DSI / Responsable IT Mobilis",
+          "influence": "Neutre",
+          "position": "Neutre",
+          "linkedin": "",
+          "raison": "Peu engagé. Gère Confluence et la partie IT. Doit valider l'intégration SSO/Salesforce. Potentiellement bloqueur."
+        },
+        {
+          "nom": "Thomas Delestre",
+          "role": "Technicien Operations / futur admin KB interne",
+          "linkedin": "",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "raison": "Sera le référent build et déploiement côté Fulli. Favorable mais peu impliqué encore."
+        },
+        {
+          "nom": "Jacques Leca",
+          "role": "Directeur Général Mobilis - Economic Buyer",
+          "influence": "Décideur",
+          "position": "Inconnu",
+          "linkedin": "https://www.linkedin.com/in/jacques-leca-35baab1/",
+          "raison": "Doit valider l'investissement pluriannuel. Non qualifié. Préférence pour les arguments 'juste besoin' et ROI factuel."
+        },
+        {
+          "nom": "Véronique Tallon",
+          "role": "Présidente Mobilis - Economic Buyer ultime",
+          "influence": "Décideur",
+          "position": "Inconnu",
+          "linkedin": "https://www.linkedin.com/in/v%C3%A9ronique-tallon-673796133/",
+          "raison": "Identifiée comme obstacle ultime par Stéphanie et Nathalie. Jamais rencontrée. Risque critique si elle bloque en codir."
+        },
+        {
+          "nom": "Jérémy Minja",
+          "role": "Achats / Procurement Eiffage",
+          "influence": "Neutre",
+          "position": "Neutre",
+          "linkedin": "",
+          "raison": "À intégrer maintenant. Seuil de mise en concurrence non qualifié. Risque d'AO si montant total dépasse le seuil."
+        }
+      ],
+      "meddpicc": {
+        "M": {
+          "status": "🟡",
+          "detail": "BC construit sur 422 000 €/an de coût d'inaction (temps recherche agents + formation + recontacts). Chiffres co-construits avec Nathalie mais pas encore validés par la direction. ROI non signé par le décideur."
+        },
+        "E": {
+          "status": "🔴",
+          "detail": "Jacques Leca (DG) et Véronique (présidente) identifiés mais jamais rencontrés. Nathalie pense que Jacques ne bloquera pas mais c'est une hypothèse. Véronique identifiée comme obstacle principal par les championnes elles-mêmes."
+        },
+        "D1": {
+          "status": "🟡",
+          "detail": "Critères partiellement connus : ROI factuel, juste besoin, différenciation vs Salesforce/Confluence. Mais critères de Véronique et Jacques totalement inconnus. Grille d'évaluation direction non obtenue."
+        },
+        "D2": {
+          "status": "🟡",
+          "detail": "Process connu à haut niveau : réunion interne Nathalie (mai) → présentation codir (fin juin) → contractualisation (juillet). Mais étapes précises, validations IT/achats et rôle de Jérémy Minja pas encore cadrés."
+        },
+        "P": {
+          "status": "🔴",
+          "detail": "Jérémy Minja (achats Eiffage) identifié mais seuil de mise en concurrence non qualifié. Si build (23k€) + run annuel (~150k€) dépasse le seuil, AO obligatoire. Process contractuel groupe Eiffage inconnu."
+        },
+        "I": {
+          "status": "✅",
+          "detail": "Douleurs exprimées et riches : absence de KB structurée depuis la filialisation, formation quasi inexistante, passation de connaissance impossible, taux de recontact élevé. Nathalie : 'on a vraiment besoin de quelque chose qui tienne la route'."
+        },
+        "C1": {
+          "status": "🟡",
+          "detail": "Nathalie Franchini est un champion solide. Stéphanie Blanchard en support mais départ imminent (retraite dans 4 mois). Thomas Delestre peu engagé. Risque si Stéphanie part avant le go."
+        },
+        "C2": {
+          "status": "🟡",
+          "detail": "Salesforce Einstein (POC non déployé - risque statu quo fort). Confluence (outil existant). Pas de concurrent KB externe. Le principal concurrent est le statu quo et Salesforce Knowledge."
+        }
+      },
+      "dernier_call": {
+        "date": "Fin mai 2026",
+        "duree": "~60 minutes",
+        "participants": "Ugo Muller (Mayday), Nathalie Franchini, Thomas Delestre (Fulli/Mobilis)",
+        "sujets": "Préparation présentation direction. Affinement périmètre utilisateurs (200 retenu). Révision business case v2. Process achats (Jérémy Minja). Positionnement vs Confluence et Salesforce. Timing closing.",
+        "points_cles": "Nathalie confirme Knowledge + Academy + AI comme priorité. Périmètre retenu : 200 users. BC v2 à refaire sur 100+30 users. Jérémy Minja à intégrer maintenant. Exec alignment CEO Mayday évoqué. Go espéré fin juin pour contractualisation juillet.",
+        "next_steps": "Ugo : refaire BC v2, préparer slides direction, se renseigner partnership OnePilot, transmettre recording démo à Thomas. Nathalie : réunion interne mai, mail à Jérémy Minja, planifier présentation à Jacques avant fin juin."
+      },
+      "next_steps": {
+        "immediat": [
+          "Livrer le BC v2 actualisé sur 100 users + version séparée avec 30 users OnePilot",
+          "Préparer le deck de présentation direction : coût d'inaction, ROI, positionnement vs Confluence/Salesforce Knowledge",
+          "Confirmer le partenariat Mayday/OnePilot auprès du partnership manager",
+          "Envoyer le recording de la 2e démo à Thomas Delestre + lui proposer une session démo dédiée"
+        ],
+        "court_terme": [
+          "Caler un point de 20-30 min avec Nathalie avant fin mai pour valider les slides direction",
+          "Demander à Nathalie le nom complet de Véronique et son profil pour adapter le pitch executive",
+          "Proposer l'exec alignment CEO Mayday / Véronique si la direction est réticente",
+          "Clarifier avec Nathalie le seuil de mise en concurrence achats (Jérémy Minja)"
+        ],
+        "moyen_terme": [
+          "Obtenir une date ferme pour la présentation codir avant fin juin",
+          "Avoir un draft contrat prêt avant le codir pour accélérer la contractualisation juillet",
+          "Préparer un plan d'onboarding Stéphanie Blanchard avant son départ"
+        ]
+      },
+      "coaching": {
+        "bien_marche": [
+          "Très bon travail de relance sur un deal dormant : continuité de la relation depuis 2023 est un vrai actif.",
+          "Business case bien construit avec la logique 'coût d'inaction' (422 000 €/an) - approche Challenger pertinente.",
+          "Excellente anticipation des objections direction : Ugo a préparé Nathalie sur le discours 'juste besoin' et la différence Confluence vs Mayday.",
+          "Proposition de l'exec alignment CEO Mayday : bonne tactique pour outiller Nathalie face à Véronique.",
+          "Thomas Delestre intégré dans le cycle : bonne décision d'embarquer le futur admin technique tôt."
+        ],
+        "a_ameliorer": [
+          "L'Economic Buyer (Véronique) n'a jamais été qualifié ni approché. Présentation direction à l'aveugle.",
+          "Ugo parle trop dans les calls (>50% du temps). Le pricing a été pitché en monologue sans check-in.",
+          "Pas de next step ferme daté à la fin du call de mai. 'Dans quelques semaines' = risque de glissement.",
+          "Le seuil de mise en concurrence Jérémy Minja non qualifié. Gap critique sur le process achats Eiffage.",
+          "Christian Carré (DSI) sous-exploité. Potentiellement bloqueur si non adressé."
+        ],
+        "actions_prioritaires": [
+          "URGENT - Qualifier Véronique avant le codir : nom complet, priorités, style de décision via Nathalie.",
+          "URGENT - Fixer une date ferme pour le point préparation codir avec Nathalie avant le 30 mai.",
+          "Livrer le BC v2 (100 users + version OnePilot) cette semaine.",
+          "Clarifier le seuil achats Eiffage avec Nathalie lors du prochain call.",
+          "Proposer à Thomas Delestre une session démo dédiée de 30 min pour en faire un second champion."
+        ],
+        "risques": [
+          "RISQUE CRITIQUE : Véronique (présidente) inconnue et identifiée comme obstacle principal. Si elle dit non en codir, le deal s'effondre.",
+          "RISQUE ÉLEVÉ : Statu quo Salesforce Einstein. La direction peut demander 'pourquoi pas Einstein ?' et trancher pour le statu quo.",
+          "RISQUE ÉLEVÉ : Process achats Eiffage. Si le seuil est atteint, AO obligatoire et closing Q3 irréaliste.",
+          "RISQUE MOYEN : Départ de Stéphanie Blanchard dans 4 mois. Nathalie serait seule championne.",
+          "RISQUE MOYEN : Congés mai-juin qui font glisser la présentation direction de juin à septembre."
+        ],
+        "questions_prochain_call": [
+          "Sur Véronique : 'Quels sont ses grands chantiers prioritaires ? Qu'est-ce qui la ferait dire oui et non à ce type d'investissement ?'",
+          "Sur le seuil achats : 'Est-ce que Jérémy t'a répondu sur le seuil de mise en concurrence ? On additionne build + 12 mois de run, je veux qu'on anticipe ensemble.'",
+          "Sur la conviction de Nathalie : 'Quel est ton argument n°1 pour justifier Mayday par rapport à Salesforce Knowledge face à la direction ?'",
+          "Sur le timing : 'Quelle est la date la plus réaliste pour la présentation direction ? Peut-on bloquer quelque chose dans l'agenda de Jacques dès maintenant ?'",
+          "Sur Christian Carré : 'Sera-t-il présent lors de la présentation à Jacques ? Est-ce qu'il y a des réserves côté IT à adresser avant ?'"
+        ]
+      }
+    },
+    "notes": null
+  },
+  {
+    "id": "prepar-vie",
+    "company": "Prépar-Vie",
+    "amount": 60000,
+    "stage": "Nouvelles discussions",
+    "closing_date": "2026-12-31",
+    "hubspot_url": "https://app-eu1.hubspot.com/contacts/4148856/record/0-3/498862570743",
+    "created_at": "2026-06-17T00:00:00.000Z",
+    "updated_at": "2026-06-18T08:23:59.037Z",
+    "transcripts": [
+      {
+        "id": "104447",
+        "title": "1er call Nadège - Discovery initial (30 min)"
+      },
+      {
+        "id": "102598",
+        "title": "Démo complète Nadège + Anne Boireau - Discovery & demo Knowledge/Academy/Selfcare (1h30)"
+      },
+      {
+        "id": "107779",
+        "title": "Atelier business case ROI avec Anne + Nadège - présentation offre (1h02)"
+      },
+      {
+        "id": "113588",
+        "title": "Démo multi-équipes Prépar-Vie en présentiel (1h15)"
+      },
+      {
+        "id": "119924",
+        "title": "Préparation présentation JF Pelé - revue docs avec Anne + Nadège (30 min)"
+      },
+      {
+        "id": "128635",
+        "title": "Point coordination DPO Anthony + RSSI Daoud (22 min)"
+      },
+      {
+        "id": "140911",
+        "title": "Point suivi post-été avec Anne + Nadège - go/no-go, timeline Pelé (39 min)"
+      },
+      {
+        "id": "145399",
+        "title": "Point clarification self-care & pricing FAQ avec Anne + Nadège (35 min)"
+      },
+      {
+        "id": "147973",
+        "title": "Point fin d'année : privacy by design Anthony, dossier contractuel (24 min)"
+      },
+      {
+        "id": "153919",
+        "title": "Meeting technique Philippe Almeida (DSI) : cas d'usage portail interne, versionning, DORA (41 min)"
+      },
+      {
+        "id": "173350",
+        "title": "Point post DG avec Anne + Filipe Almeida : lotissement par vague, nouveau DG (19 min)"
+      },
+      {
+        "id": "196285",
+        "title": "Dernier call juin 2026 : projet inscrit dans les 30 chantiers stratégiques, timeline Q1 2027 (45 min)"
+      }
+    ],
+    "todos": [
+      {
+        "id": "g-admin",
+        "label": "Admin",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t1",
+            "label": "Opportunité créée dans HubSpot avec tous les champs renseignés",
+            "done": true
+          },
+          {
+            "id": "t2",
+            "label": "MEDDPICC complété"
+          },
+          {
+            "id": "t3",
+            "label": "Mapping de tous les départements et interlocuteurs"
+          }
+        ]
+      },
+      {
+        "id": "g-deal",
+        "label": "Deal",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t4",
+            "label": "Champion identifié",
+            "done": true
+          },
+          {
+            "id": "t5",
+            "label": "Interlocuteurs et décisionnaires ajoutés sur LinkedIn"
+          },
+          {
+            "id": "t6",
+            "label": "Invitation aux événements marketing",
+            "done": true
+          },
+          {
+            "id": "t7",
+            "label": "Décisionnaire identifié",
+            "done": true,
+            "subs": [
+              {
+                "id": "t7a",
+                "label": "Le décisionnaire a-t-il été contacté ?",
+                "done": true
+              }
+            ]
+          },
+          {
+            "id": "t8",
+            "label": "Signataire identifié",
+            "done": true,
+            "subs": [
+              {
+                "id": "t8a",
+                "label": "Le signataire a-t-il été contacté ?",
+                "done": true
+              },
+              {
+                "id": "t8b",
+                "label": "Le signataire est-il sensibilisé au projet ?",
+                "done": true
+              }
+            ]
+          },
+          {
+            "id": "t9",
+            "label": "Détracteur identifié",
+            "done": true,
+            "subs": [
+              {
+                "id": "t9a",
+                "label": "Le détracteur a-t-il été adressé ?"
+              }
+            ]
+          },
+          {
+            "id": "t10",
+            "label": "Rencontre physique faite",
+            "done": true
+          },
+          {
+            "id": "t11",
+            "label": "Compétition identifiée"
+          },
+          {
+            "id": "t12",
+            "label": "Partenaires activés"
+          },
+          {
+            "id": "t13",
+            "label": "Executive alignment fait"
+          }
+        ]
+      }
+    ],
+    "generated": {
+      "snapshot": {
+        "montant": "5 000 EUR MRR estimé (env. 60 000 EUR ARR). Offre initiale présentée à ~75 000 EUR/an pour 69 utilisateurs. Scénario 100 utilisateurs envisagé avec palier de dégressivité. Budget 2026 DSI épuisé - démarrage réaliste Q1 2027.",
+        "licences": "Entre 70 et 120 utilisateurs selon le périmètre retenu. Lot 1 envisagé : DSC (~70), Conformité (~11), RH, Marketing, soit ~100 personnes.",
+        "produits": "Mayday Knowledge (base connaissance interne) + Mayday Academy (formation/LMS) + Mayday Selfcare (FAQ externe partenaires/distributeurs) + Mayday AI (Ask, agents IA, génération de contenu)",
+        "populations": "Équipes DSC (Service Relation Client, ~70 personnes - Nadège Martin), Conformité/Contrôle permanent (~11), RH, Marketing, Direction Produits/Développement (Anne Boireau). Distributeurs/réseaux (Bred, UNEP, Talent, Zénith, Laplace) via Selfcare.",
+        "stage": "Nouvelles discussions - deal rallongé par succession de 2 DG. Nouveau DG (arrivé il y a 2 mois) a initié un cabinet de conseil (Courcelle) pour rationaliser la stratégie. Sur 140 projets, 30 ont été retenus pour 2026-2027, dont Mayday.",
+        "probability": "35% - Deal vivant et dans les 30 projets stratégiques validés, mais timeline poussée à Q1 2027, budget DSI 2026 épuisé, nouveau DG en phase de prise en main.",
+        "timeline": "Atelier Nadège avec cabinet Courcelle : 8 juin 2026. Atelier interne Anne + Nadège : ~18 juin. Meeting présentation lotissement Hugo + Anne + Nadège : 25 juin 2026. Stratégie présentée à la Bred : fin juin 2026. Démarrage réaliste : Q1 2027.",
+        "compelling_event": "Départ en retraite de Jean-François Pelé (ex-DG, prévu juillet 2026). Nouveau DG en phase de structuration stratégique - doit présenter sa feuille de route à la Bred fin juin 2026. Mayday inscrit dans les 30 chantiers prioritaires 2026-2027 sur 140.",
+        "solutions_actuelles": "Portail intranet maison (procédures, RH, documentation réglementaire), OpenText (gestion documentaire), répertoires réseau, micro-connaissances individuelles (Post-it, documents locaux). 34% des dossiers clients nécessitent une relance ou consultation interne. Pas de base de connaissances centralisée.",
+        "competition": "Non identifiée explicitement dans les calls. Référence positive à Suravenir Assurance (client Mayday, même profil banque-assureur). Retour d'expérience Boursorama transmis. Risque de sélection DSI Bred si budget dépasse le seuil d'achat filial (113k€ HT mentionné comme seuil de vigilance)."
+      },
+      "prochain_meeting": {
+        "date": "2026-06-25",
+        "participants": "Ugo Muller (Mayday), Anne Boireau (Prépar-Vie, Directrice Développement produits), Nadège Martin (Prépar-Vie, Directrice DSC)",
+        "topic": "Présentation du lotissement par vague - vision Mayday vs. roadmap stratégique Prépar-Vie",
+        "objectif": "Aligner le mode de déploiement par lots (DSC + Conformité + RH + Marketing en lot 1) avec la stratégie du nouveau DG présentée à la Bred fin juin. Valider la logique de lotissement avant présentation officielle.",
+        "status": "Confirmé - invitation envoyée par Hugo"
+      },
+      "stakeholders": [
+        {
+          "nom": "Nadège Martin",
+          "role": "Directrice DSC (Service Relation Client, ~70 personnes)",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Initiatrice du projet Mayday depuis le début. Très engagée, partage des données internes (34% recontacts, volumes dossiers). A mesuré les douleurs de son équipe. Porteuse du projet même après le changement de DG. Veut aller au bout - 'ça fait beaucoup de temps qu'on est dessus'. A des tensions personnelles avec le DPO Anthony."
+        },
+        {
+          "nom": "Anne Boireau",
+          "role": "Directrice Développement Produits / Outils / Services (périmètre élargi depuis 2024, incluant initiatives transverses entreprise)",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Co-porteuse du projet avec Nadège. Chez Prépar depuis 1991, connait tout le monde. Rôle stratégique élargi lui a donné les moyens de faire de Mayday un projet entreprise et non plus uniquement DSC. Mène les négociations avec le DSI et prépare la présentation au DG. Très méticuleuse sur le volet contractuel et budgétaire."
+        },
+        {
+          "nom": "Jean-François Pelé",
+          "role": "Ancien DG Prépar-Vie (départ prévu juillet 2026)",
+          "linkedin": "",
+          "influence": "Décideur",
+          "position": "Neutre",
+          "raison": "A vu une démo, n'a pas dit oui ni non au budget (75k€). N'est pas tombé de sa chaise. Veut laisser une empreinte de modernité avant son départ. Demande des références clients (Suravenir). A demandé une analyse DORA/sécurité. A compris que Mayday ne remplace pas entièrement le portail existant. Son remplaçant n'est pas encore annoncé - risque de recommencer à zéro si pas d'accord avant son départ."
+        },
+        {
+          "nom": "Geoffrey Brossier",
+          "role": "Directeur Général Prépar-Vie (en poste depuis ~avril 2026)",
+          "influence": "Décideur",
+          "position": "Favorable",
+          "linkedin": "https://www.linkedin.com/in/geoffroybrossier/",
+          "raison": "A initié une rationalisation stratégique avec le cabinet Courcelle. A retenu Mayday parmi les 30 projets prioritaires sur 140. Orienté aide aux collaborateurs - Mayday s'aligne avec sa vision. Doit présenter sa stratégie à la Bred fin juin 2026. Pas encore rencontré directement par l'AE - risque non adressé."
+        },
+        {
+          "nom": "Filipe Almeida",
+          "role": "DSI Prépar-Vie",
+          "influence": "Décideur",
+          "position": "Favorable",
+          "linkedin": "",
+          "raison": "Rencontré en janvier 2026. A validé la faisabilité technique du remplacement du portail interne par Mayday. Questions adressées : versionning (OK), réversibilité DORA (OK), limites de taille fichiers (OK), API intégration OpenText (OK). Point de blocage potentiel : seuil d'achat filial Bred (~113k€ HT mentionné). Doit passer par la direction fournisseur Bred (Marianne Sabatier, Pauline Henry) pour référencement. A rempli ou doit remplir un questionnaire d'assessment prestataire."
+        },
+        {
+          "nom": "Anthony",
+          "role": "DPO Prépar-Vie",
+          "linkedin": "",
+          "influence": "Bloqueur",
+          "position": "Favorable",
+          "raison": "Privacy by design réalisé - pas de données personnelles clients dans Mayday, donc peu de sujets. A validé le dossier DPO selon Anne et Nadège. Questionnaire privacy by design quasi-finalisé en décembre 2025. Tensions interpersonnelles avec Nadège Martin (à gérer)."
+        },
+        {
+          "nom": "Daoud",
+          "role": "RSSI Prépar-Vie",
+          "linkedin": "",
+          "influence": "Bloqueur",
+          "position": "Favorable",
+          "raison": "A reçu et validé les documents de sécurité envoyés par Anne. A demandé un point d'information complémentaire (rencontré en janvier 2026). Préoccupation principale : sécurité de la connaissance d'entreprise hébergée dans Mayday (pas les données personnelles). Semble aligné positivement."
+        },
+        {
+          "nom": "Geoffrey (cabinet Courcelle - Doug-Xavier)",
+          "role": "Consultant externe - cabinet Courcelle (stratégie entreprise)",
+          "linkedin": "",
+          "influence": "Neutre",
+          "position": "Neutre",
+          "raison": "Cabinet mandaté par le nouveau DG pour rationaliser les 140 projets en 30 priorités 2026-2027. Mayday a été retenu dans ces 30 projets. Nadège doit travailler avec lui le 8 juin pour formaliser le projet dans la stratégie groupe (ROI, valeur, alignement stratégique Bred). Non rencontré par l'AE."
+        }
+      ],
+      "meddpicc": {
+        "M": {
+          "status": "🟡",
+          "detail": "Business case construit avec Ugo (107779) : coût d'inaction estimé ~600k€/an (conservateur, sur périmètre gestionnaires uniquement). Paramètres : 34% recontacts DSC, 10-20% dossiers nécessitent recherche connaissance, 120 jours montée en compétence, 2 ETP administration connaissance. Chiffres co-construits avec Nadège mais pas encore validés formellement avec le décideur (Pelé ou nouveau DG). Métriques business non quantifiées côté décideur."
+        },
+        "E": {
+          "status": "🟡",
+          "detail": "Ancien décideur JF Pelé identifié et rencontré - n'a pas rejeté le budget. Nouveau DG arrivé en avril 2026 - non encore rencontré directement par l'AE. Budget 2026 DSI épuisé. Budget 2027 dépend de la stratégie présentée à la Bred fin juin 2026 et de la décision du nouveau DG. Chemin budgétaire flou : projet rattaché DSI mais aucune clarté sur le cycle budgétaire 2027."
+        },
+        "D1": {
+          "status": "🟡",
+          "detail": "Critères partiellement connus : centralisation connaissance, ergonomie, IA, self-care partenaires, versionning/conformité, remplacement portail interne, pas d'appel d'offres si budget sous seuil Bred. Critères du nouveau DG non encore formalisés - à qualifier lors du meeting du 25 juin."
+        },
+        "D2": {
+          "status": "🟡",
+          "detail": "Processus connu jusqu'à fin 2025 (Pelé) mais remis à zéro par changement de DG. Nouveau process : ateliers avec cabinet Courcelle (8 juin), présentation stratégie à la Bred (fin juin 2026), validation DG, budget 2027, référencement fournisseur DSI Bred. Étapes contractuelles : assessment prestataire direction fournisseur Bred, contractualisation juridique. Timeline réaliste : Q1 2027."
+        },
+        "P": {
+          "status": "🟡",
+          "detail": "Plusieurs éléments connus : contrat/bon de commande à fournir à Philippe (DSI), assessment fournisseur direction achats Bred (Marianne Sabatier, Pauline Henry), risque de référencement DSI Bred si dépassement seuil. Privacy by design DPO quasi-validé. Questionnaire sécurité RSSI adressé. Réversibilité/DORA adressée avec Benjamin (CTO Mayday). Liste de documents de référencement à préparer (Nadège). Durée estimée du paper process : plusieurs semaines post-accord."
+        },
+        "I": {
+          "status": "✅",
+          "detail": "Douleurs bien identifiées et verbalisées par les champions : connaissances éparpillées dans 36 outils (portail, drive, documents réseau, micro-connaissances), 34% de recontacts clients mesurés par Nadège, code ARECODE coché à 100% selon Nadège ('on coche toutes les cases'), double réglementation code des assurances + code monétaire et financier, turnover et montée en compétence lente (120j), pas de détection de l'obsolescence. Le compelling event est le départ de Pelé et la stratégie du nouveau DG."
+        },
+        "C1": {
+          "status": "✅",
+          "detail": "Deux champions solides : Nadège Martin (initiatrice, données chiffrées, engagement fort) et Anne Boireau (30 ans d'ancienneté, accès DG, mène les négociations IT). Les deux ont proactivement partagé des infos internes, organisé les meetings avec les parties prenantes, co-construit le business case. Anne a accès à l'agenda de Pelé et du nouveau DG. Nadège est pilote du projet côté Prépar."
+        },
+        "C2": {
+          "status": "🟡",
+          "detail": "Aucun concurrent explicitement mentionné dans les calls. Risque principal : solution interne DSI Bred (si budget dépasse seuil), ou appel d'offres imposé par la direction achats Bred. Suravenir et Boursorama mentionnés comme références positives Mayday - à activer si Pelé/DG demande retours clients."
+        }
+      },
+      "dernier_call": {
+        "date": "2026-05-xx",
+        "duree": "45 min (dont ~20 min de contenu utile, reste connexion technique + discussion interne Mayday post-call)",
+        "participants": "Ugo Muller (Mayday), Nadège Martin (DSC), Anne Boireau (Développement)",
+        "sujets": "Update stratégique post-nouveau DG, lotissement par vague, timeline",
+        "points_cles": "Mayday retenu parmi les 30 projets prioritaires sur 140 après rationalisation par cabinet Courcelle. Budget 2026 DSI épuisé. Démarrage réaliste Q1 2027. Projet rattaché à la DSI (et non plus à la DSC seule). Déploiement envisagé par lots/direction (DSC + Conformité + Marketing + RH en lot 1). Nadège a un atelier avec Courcelle le 8 juin. Meeting de présentation du lotissement prévu le 25 juin avec Hugo.",
+        "next_steps": "Atelier Nadège avec Courcelle (8 juin). Atelier interne Anne + Nadège (autour du 18 juin). Meeting présentation lotissement : jeudi 25 juin 2026 à 10h avec Ugo. Stratégie présentée à la Bred fin juin. Démarrage Q1 2027."
+      },
+      "next_steps": {
+        "immediat": [
+          "Préparer la présentation du lotissement pour le meeting du 25 juin : montrer comment Mayday s'intègre dans la stratégie du nouveau DG lot par lot (DSC + Conformité + RH + Marketing en lot 1)",
+          "Préparer les arguments de valeur alignés avec les objectifs stratégiques du nouveau DG (aide aux collaborateurs, digitalisation, automatisation, IA)",
+          "Envoyer le projet de contrat à Philippe Almeda (DSI) pour le processus d'assessment fournisseur Bred"
+        ],
+        "court_terme": [
+          "Meeting 25 juin : présenter le lotissement et aligner avec la stratégie Bred",
+          "Obtenir une rencontre directe avec le nouveau DG (via Anne ou Nadège) avant la présentation à la Bred",
+          "Activer une référence client Suravenir pour Pelé ou le nouveau DG si demandée",
+          "Anticiper le dossier de référencement fournisseur DSI Bred : préparer tous les documents nécessaires (Kbis, assurances, etc.)"
+        ],
+        "moyen_terme": [
+          "Accompagner Anne et Nadège dans la présentation de la stratégie à la Bred (fin juin)",
+          "Préparer le budget 2027 avec un scénario agressif si possible (offre avant fin d'année pour capturer le budget DSI 2027)",
+          "Planifier la démonstration pour la plénière de Nadège (fin janvier 2027)",
+          "Construire un Mutual Action Plan (MAP) avec des dates claires Q3-Q4 2026"
+        ]
+      },
+      "coaching": {
+        "bien_marche": [
+          "Relation de confiance exceptionnelle construite avec Nadège et Anne sur 12+ mois - elles se battent pour le projet même après un changement de DG",
+          "Business case co-construit avec les champions - chiffres validés par Nadège (34% recontacts, données dossiers)",
+          "Toutes les parties prenantes techniques ont été adressées (DSI, DPO, RSSI) et validées positivement",
+          "Le projet a survécu au changement de DG et est inscrit dans les 30 chantiers prioritaires 2026-2027 - signal fort",
+          "Démonstrations multiples (équipes métier, DSI, plénière prévue) avec engagement croissant des parties prenantes"
+        ],
+        "a_ameliorer": [
+          "Le nouveau DG n'a jamais été rencontré directement par l'AE - risque majeur : il découvrira Mayday via Anne/Nadège sans pitch de l'AE",
+          "Pas de Mutual Action Plan formalisé et daté avec les champions - le deal avance par à-coups sans jalons clairs",
+          "Le compelling event (départ Pelé) a été manqué - il fallait forcer une décision avant son départ. Il faut créer le prochain compelling event autour du budget 2027",
+          "La question de la compétition n'a jamais été explicitement posée - on ne sait pas si le nouveau DG regarde d'autres solutions",
+          "L'AE représente un risque de rapport de force inversé : c'est lui qui attend les champions plutôt que de créer de l'urgence"
+        ],
+        "actions_prioritaires": [
+          "Demander à Anne ou Nadège d'organiser un appel de 20 min avec le nouveau DG AVANT la présentation à la Bred (fin juin) pour se présenter et qualifier ses critères de décision",
+          "Construire et partager un Mutual Action Plan avec les dates : meeting 25 juin, présentation Bred fin juin, budget 2027, signature Q1 2027",
+          "Préparer une offre 'signature avant fin 2026' avec une remise significative pour créer l'urgence budgétaire",
+          "Envoyer le projet de contrat à Philippe (DSI) immédiatement pour lancer le processus d'assessment fournisseur Bred"
+        ],
+        "risques": [
+          "RISQUE CRITIQUE : Le nouveau DG n'est pas encore aligné personnellement - il a retenu le projet stratégiquement mais n'a jamais rencontré Mayday. Son successeur pourrait remettre en cause le projet.",
+          "RISQUE BUDGET : Budget DSI 2026 épuisé. Si le budget 2027 n'est pas provisionné explicitement avant fin 2026, le deal glisse à 2028.",
+          "RISQUE BRED : Si le budget dépasse le seuil d'achat filial (~113k€), la direction achats Bred impose un appel d'offres et potentiellement une recherche de solution interne au groupe.",
+          "RISQUE CHAMPION : Nadège est en phase de déménagement et absente du 15 au 25 janvier 2027. Anne porte seule pendant cette période.",
+          "RISQUE DETRACTEUR : Anthony (DPO) a des tensions avec Nadège - à surveiller. Il peut bloquer silencieusement le dossier contractuel."
+        ],
+        "questions_prochain_call": [
+          "Qui est le nouveau DG, comment s'appelle-t-il, et quel est son style de décision ? Comment se fait-il qu'on ne l'ait jamais rencontré ?",
+          "Dans la stratégie présentée à la Bred fin juin, est-ce que Mayday apparaît nommément ou sous une forme générique 'outil de knowledge management' ? Est-ce qu'il y a un budget chiffré ?",
+          "Est-ce que le nouveau DG a regardé ou entendu parler d'autres solutions de gestion des connaissances depuis son arrivée ?",
+          "Quel est exactement le seuil d'appel d'offres de la direction achats Bred ? 113k€ HT en une fois, ou annuel ?",
+          "Peut-on organiser un point de 20 minutes avec le nouveau DG avant la présentation à la Bred pour qu'il entende Mayday directement ?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "compagnie-des-alpes",
+    "company": "Compagnie des Alpes",
+    "amount": 36000,
+    "stage": "Démo",
+    "closing_date": "2026-09-30",
+    "hubspot_url": "https://app-eu1.hubspot.com/contacts/4148856/record/0-3/505110886606",
+    "created_at": "2026-05-28T00:00:00.000Z",
+    "updated_at": "2026-06-18T08:03:44.124Z",
+    "transcripts": [
+      {
+        "id": "transcript-20260528",
+        "title": "Réunion Mayday - Compagnie des Alpes",
+        "date": "2026-05-28",
+        "duree": "1h44",
+        "type": "Démo / Discovery",
+        "participants": "MICO Claire (PO, CDA), Lucas (Mayday AE), Cindy Manon (CDA)",
+        "resume": "Réunion de découverte et démo avec la Compagnie des Alpes. Claire est PO sur un projet BI de récupération des chiffres d'affaires sur l'intégralité des parcs de loisirs. La discussion porte sur un potentiel déploiement Mayday au sein de la CDA, avec un premier déploiement au Parc Astérix déjà en cours. Le Mayday AE mentionne des opportunités d'expansion vers d'autres entités CDA (RH, etc.). La question du périmètre utilisateurs (cenaine de users minimum) et de la cohérence tarifaire est soulevée. Pas de connecteur Microsoft Dynamics disponible côté Mayday. Un next step est fixé le 16 juillet à 11h avec Claire uniquement. Retours très positifs sur l'outil et la collaboration existante avec le Parc Astérix.",
+        "signaux_achat": [
+          "Question sur le périmètre et l'extension à d'autres entités CDA (1h41)",
+          "Retours positifs sur la collaboration avec le Parc Astérix (1h44)",
+          "Engagement actif sur un next step daté au 16 juillet (1h44)"
+        ],
+        "objections": [
+          "Taille du périmètre : une centaine d'utilisateurs jugée insuffisante commercialement par l'AE Mayday",
+          "Absence de connecteur Microsoft Dynamics",
+          "Contraintes tarifaires liées à la cohérence des pratiques commerciales du board Mayday"
+        ],
+        "next_steps": "Point fixé le 16 juillet à 11h avec Claire uniquement. L'AE Mayday enverra un récap + to-do list. Enregistrement du call à partager."
+      }
+    ],
+    "todos": [
+      {
+        "id": "g-admin",
+        "label": "Admin",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t1",
+            "label": "Opportunité créée dans HubSpot avec tous les champs renseignés",
+            "checked": true
+          },
+          {
+            "id": "t2",
+            "label": "MEDDPICC complété"
+          },
+          {
+            "id": "t3",
+            "label": "Mapping de tous les départements et interlocuteurs"
+          }
+        ]
+      },
+      {
+        "id": "g-deal",
+        "label": "Deal",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t4",
+            "label": "Champion identifié",
+            "checked": true
+          },
+          {
+            "id": "t5",
+            "label": "Interlocuteurs et décisionnaires ajoutés sur LinkedIn"
+          },
+          {
+            "id": "t6",
+            "label": "Invitation aux événements marketing",
+            "checked": true
+          },
+          {
+            "id": "t7",
+            "label": "Décisionnaire identifié",
+            "subs": [
+              {
+                "id": "t7a",
+                "label": "Le décisionnaire a-t-il été contacté ?"
+              }
+            ]
+          },
+          {
+            "id": "t8",
+            "label": "Signataire identifié",
+            "subs": [
+              {
+                "id": "t8a",
+                "label": "Le signataire a-t-il été contacté ?"
+              },
+              {
+                "id": "t8b",
+                "label": "Le signataire est-il sensibilisé au projet ?"
+              }
+            ]
+          },
+          {
+            "id": "t9",
+            "label": "Détracteur identifié",
+            "subs": [
+              {
+                "id": "t9a",
+                "label": "Le détracteur a-t-il été adressé ?"
+              }
+            ]
+          },
+          {
+            "id": "t10",
+            "label": "Rencontre physique faite",
+            "checked": true
+          },
+          {
+            "id": "t11",
+            "label": "Compétition identifiée"
+          },
+          {
+            "id": "t12",
+            "label": "Partenaires activés"
+          },
+          {
+            "id": "t13",
+            "label": "Executive alignment fait"
+          }
+        ]
+      }
+    ],
+    "generated": {
+      "snapshot": {
+        "montant": "3 000€ MRR / 36 000€ ARR",
+        "licences": "~100 utilisateurs minimum (périmètre initial CDA à définir)",
+        "produits": "Knowledge + pot IA",
+        "populations": "Équipes opérationnelles parcs de loisirs CDA (potentiel extension RH, autres départements)",
+        "stage": "Démo",
+        "probability": "30%",
+        "timeline": "Closing visé Q3 2026",
+        "compelling_event": "Expansion Mayday depuis le Parc Astérix vers les autres entités CDA. Projet BI en cours porté par Claire (PO) pour consolider les données de tous les parcs.",
+        "solutions_actuelles": "Pas clairement identifié. Mayday déjà déployé au Parc Astérix. Mention de ViaDialog comme connecteur existant.",
+        "competition": "Non identifiée à ce stade"
+      },
+      "prochain_meeting": {
+        "date": "2026-07-16",
+        "participants": "Claire (PO CDA), Lucas (AE Mayday)",
+        "topic": "Avancement du projet - périmètre et faisabilité déploiement CDA groupe",
+        "objectif": "Qualifier le périmètre utilisateurs, identifier l'Economic Buyer, aligner sur une offre commerciale cohérente avec les contraintes du board Mayday",
+        "status": "Confirmé - invitation Teams à envoyer"
+      },
+      "stakeholders": [
+        {
+          "nom": "Claire MICO",
+          "role": "Product Owner - Projet BI CDA",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "linkedin": "",
+          "raison": "Porte le projet en interne, moteur de la réunion, exprime des retours positifs sur Mayday et la collaboration avec le Parc Astérix. Engage directement sur le next step."
+        },
+        {
+          "nom": "Cindy Manon",
+          "role": "Collaboratrice CDA (rôle précis non identifié)",
+          "influence": "Neutre",
+          "position": "Favorable",
+          "linkedin": "",
+          "raison": "Présente lors du call mais peu d'intervention identifiée dans la transcription disponible."
+        },
+        {
+          "nom": "Sophie Ferraz",
+          "role": "Direction - Responsable Projets Applicatifs & E-Commerce",
+          "influence": "Décideur",
+          "position": "Favorable",
+          "linkedin": "https://www.linkedin.com/in/sophie-f-78334287/",
+          "raison": "Elle est 100% sponsor de Mayday et nous connait très bien + connait très bien David Lunel (Parc Astérix)"
+        }
+      ],
+      "meddpicc": {
+        "M": {
+          "status": "🟡",
+          "detail": "Pas de métriques quantifiées côté prospect. Claire est PO d'un projet BI sur l'intégralité des transactions de tous les parcs de loisirs CDA - enjeu fort de consolidation et fiabilité des données. Pas de chiffrage du gain attendu avec Mayday."
+        },
+        "E": {
+          "status": "❌",
+          "detail": "Economic Buyer non identifié. L'AE mentionne un 'board' et 'Damien' côté Mayday mais le décideur côté CDA n'a pas été qualifié. Claire est PO, pas décideuse budget."
+        },
+        "D1": {
+          "status": "❌",
+          "detail": "Critères de décision non explicités. La design authority a déjà été faite côté Parc Astérix mais ne portait pas sur l'IA (potentiellement un jalon supplémentaire). Nécessite probable de passer par un contrat cadre (processus qui prend en moyenne 6 mois"
+        },
+        "D2": {
+          "status": "🟡",
+          "detail": "Processus de décision partiellement évoqué. L'AE Mayday mentionne des contraintes de cohérence tarifaire vis-à-vis de leur board. Côté CDA, le processus de validation interne (RH, autres départements) est évoqué mais pas formalisé."
+        },
+        "P": {
+          "status": "❌",
+          "detail": "Paper process non abordé. Contrat cadre probable (processus qui prend 1 mois)"
+        },
+        "I": {
+          "status": "🟡",
+          "detail": "Douleur partielle : Claire porte un projet BI de consolidation de tous les CA et transactions des parcs CDA. Le besoin de structuration de la connaissance est implicite via l'extension depuis le Parc Astérix. Pas de douleur verbalisée avec impact quantifié."
+        },
+        "C1": {
+          "status": "🟡",
+          "detail": "Sophie Ferraz"
+        },
+        "C2": {
+          "status": "❌",
+          "detail": "Aucun concurrent identifié ou mentionné dans la transcription disponible."
+        }
+      },
+      "dernier_call": {
+        "date": "2026-05-28",
+        "duree": "1h44",
+        "participants": "Claire - PO CDA, Cindy Manon - CDA, Lucas - AE Mayday",
+        "sujets": "Présentation des rôles, contexte projet BI CDA, exploration extension Mayday au groupe CDA, discussion sur le périmètre utilisateurs et la cohérence tarifaire, connecteurs disponibles (ViaDialog oui, Microsoft Dynamics non), next step",
+        "points_cles": "1/ Mayday déjà en prod au Parc Astérix - retours très positifs. 2/ Claire est PO d'un projet BI sur tous les parcs CDA, cherche à étendre Mayday à d'autres entités. 3/ L'AE Mayday soulève la contrainte de périmètre minimum (100 users jugés insuffisants pour le board). 4/ Pas de connecteur Microsoft Dynamics disponible. 5/ Contrainte de cohérence tarifaire mentionnée par l'AE - risque de 'cas par cas'. 6/ Next step fixé au 16 juillet à 11h avec Claire uniquement.",
+        "next_steps": "1/ AE Mayday envoie invitation Teams pour le 16 juillet à 11h. 2/ AE Mayday envoie récap + to-do list post-call. 3/ Claire reçoit l'enregistrement du call. 4/ Sur le 16 juillet : qualifier l'Economic Buyer, le périmètre exact et le processus de décision CDA."
+      },
+      "next_steps": {
+        "immediat": [
+          "Envoyer l'invitation Teams pour le 16 juillet à 11h (Claire uniquement)",
+          "Envoyer le récap du call avec les to-dos à Claire",
+          "Partager l'enregistrement du call à Claire",
+          "Préparer une proposition de périmètre chiffré (100 / 150 / 200 users) pour débloquer la discussion tarifaire avec le board Mayday"
+        ],
+        "court_terme": [
+          "Préparer le call du 16 juillet : questions MEDDPICC manquantes (Economic Buyer, critères de décision, processus d'achat CDA)",
+          "Identifier qui sont les RH et autres départements potentiellement concernés chez CDA",
+          "Clarifier avec le board Mayday les conditions d'un contrat groupe CDA (seuil de licences, tarification cohérente)"
+        ],
+        "moyen_terme": [
+          "Organiser une réunion avec l'Economic Buyer CDA identifié",
+          "Construire un business case basé sur le ROI Parc Astérix étendu à l'ensemble des entités CDA",
+          "Évaluer la faisabilité d'un connecteur Microsoft Dynamics si c'est un critère bloquant"
+        ]
+      },
+      "coaching": {
+        "bien_marche": [
+          "Next step ferme obtenu avec une date et un horaire confirmés (16 juillet 11h)",
+          "Transparence sur les contraintes côté Mayday (cohérence tarifaire, seuil de licences) - posture honnête qui crédibilise",
+          "Bonne maîtrise du contexte existant (Parc Astérix) utilisé comme levier de confiance",
+          "Ton conversationnel et relation de confiance visible avec Claire"
+        ],
+        "a_ameliorer": [
+          "Economic Buyer non qualifié après 1h44 de call - c'est le gap MEDDPICC le plus critique",
+          "Aucune douleur quantifiée extraite - la réunion reste sur un niveau fonctionnel, pas stratégique",
+          "La contrainte tarifaire Mayday a été évoquée trop tôt sans avoir qualifié la valeur perçue côté prospect",
+          "Microsoft Dynamics mentionné comme blocker potentiel sans avoir creusé si c'est vraiment un critère éliminatoire"
+        ],
+        "actions_prioritaires": [
+          "Qualifier l'Economic Buyer avant ou pendant le call du 16 juillet - demander à Claire directement : 'Qui valide le budget pour ce type de projet chez CDA ?'",
+          "Construire un ROI chiffré basé sur le déploiement Parc Astérix pour justifier l'expansion groupe",
+          "Clarifier en interne avec le board Mayday le seuil minimum acceptable pour un contrat CDA groupe avant le 16 juillet"
+        ],
+        "risques": [
+          "Economic Buyer non identifié : le deal peut rester bloqué au niveau opérationnel sans jamais remonter à la direction",
+          "Contrainte de périmètre minimum Mayday (100 users insuffisants) peut bloquer le deal si la CDA ne peut pas s'engager sur un volume plus important",
+          "Absence de connecteur Microsoft Dynamics peut être rédhibitoire selon les cas d'usage CDA non encore qualifiés",
+          "Risque de 'cas par cas' tarifaire désapprouvé par le board Mayday - nécessite une offre groupe packagée avant de progresser"
+        ],
+        "questions_prochain_call": [
+          "Qui valide le budget pour un projet de ce type chez CDA - est-ce que tu as un sponsor côté direction ?",
+          "Quel est le processus d'achat standard CDA pour un SaaS : appel d'offres, achat direct, validation DSI ?",
+          "Combien d'agents et de collaborateurs seraient concernés si on déployait Mayday sur l'ensemble des entités CDA ?",
+          "Quel est le cas d'usage principal que tu as en tête avec Microsoft Dynamics - est-ce un must-have ou un nice-to-have ?",
+          "Quel est ton calendrier interne : y a-t-il une échéance projet ou budgétaire qui conditionne la décision ?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "infomil",
+    "company": "Infomil",
+    "amount": 240000,
+    "stage": "Business Case",
+    "closing_date": "2026-12-31",
+    "hubspot_url": "https://app-eu1.hubspot.com/contacts/4148856/record/0-3/498913848545",
+    "created_at": "2026-06-17T00:00:00.000Z",
+    "updated_at": "2026-06-18T08:18:16.626Z",
+    "transcripts": [],
+    "todos": [
+      {
+        "id": "g-admin",
+        "label": "Admin",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t1",
+            "label": "Opportunité créée dans HubSpot avec tous les champs renseignés",
+            "checked": true
+          },
+          {
+            "id": "t2",
+            "label": "MEDDPICC complété",
+            "checked": true
+          },
+          {
+            "id": "t3",
+            "label": "Mapping de tous les départements et interlocuteurs",
+            "checked": true
+          }
+        ]
+      },
+      {
+        "id": "g-deal",
+        "label": "Deal",
+        "isGroup": true,
+        "children": [
+          {
+            "id": "t4",
+            "label": "Champion identifié",
+            "checked": true,
+            "notes": "Cédric Khun"
+          },
+          {
+            "id": "t5",
+            "label": "Interlocuteurs et décisionnaires ajoutés sur LinkedIn"
+          },
+          {
+            "id": "t6",
+            "label": "Invitation aux événements marketing",
+            "checked": true
+          },
+          {
+            "id": "t7",
+            "label": "Décisionnaire identifié",
+            "subs": [
+              {
+                "id": "t7a",
+                "label": "Le décisionnaire a-t-il été contacté ?",
+                "notes": "Oui pour Michel Itie mais pas encore le DG (Denis Dargelos)"
+              }
+            ],
+            "checked": true
+          },
+          {
+            "id": "t8",
+            "label": "Signataire identifié",
+            "subs": [
+              {
+                "id": "t8a",
+                "label": "Le signataire a-t-il été contacté ?",
+                "notes": "Denis Dargelos (DG)"
+              },
+              {
+                "id": "t8b",
+                "label": "Le signataire est-il sensibilisé au projet ?"
+              }
+            ],
+            "notes": "",
+            "checked": true
+          },
+          {
+            "id": "t9",
+            "label": "Détracteur identifié",
+            "subs": [
+              {
+                "id": "t9a",
+                "label": "Le détracteur a-t-il été adressé ?"
+              }
+            ]
+          },
+          {
+            "id": "t10",
+            "label": "Rencontre physique faite"
+          },
+          {
+            "id": "t11",
+            "label": "Compétition identifiée",
+            "checked": true,
+            "notes": "Pas de compétition"
+          },
+          {
+            "id": "t12",
+            "label": "Partenaires activés"
+          },
+          {
+            "id": "t13",
+            "label": "Executive alignment fait"
+          }
+        ]
+      }
+    ],
+    "generated": {
+      "snapshot": {
+        "montant": "240 000 € ARR",
+        "licences": "200 licences (equipes support InfoMil) + potentiellement RH/autres fonctions internes --> 800 users au total.",
+        "produits": "Mayday Knowledge + Mayday AI + Mayday Academy",
+        "populations": "200 agents support IT (infogerance, support applicatif, support metier, NOC) - perimetre cible full support InfoMil. Selfcare exclu explicitement par la direction.",
+        "stage": "Demo faite - demo personnalisee realisee aupres du decisionnaire Michel Itie + Herve Ducouret (DSI), Christophe Culaurier, Cathy Etienne",
+        "probability": "35%",
+        "timeline": "Budget annuel ouvert (demarre recemment). Closing cible Q4 2026. Processus interne : debrief equipes > decision priorisation > ROI/chiffrage > nego avec Denis (DG) assiste de Herve Ducouret (DSI).",
+        "compelling_event": "Schema directeur en cours incluant refonte GED + gouvernance de la donnee. Projet Academy en lien avec gestion des competences RH (DVRH). Turnover ~30% sur le support metier encaissement.",
+        "solutions_actuelles": "GED interne (non structuree, docs potentiellement obsoletes), WikiPirate (wiki interne non officiel), outil de ticketing maison, plateforme tuto e-learning interne.",
+        "competition": "Non identifiee explicitement. Cedric a mentionne Mayday en tant que leader francais. Culture Leclerc = acheteurs grande distribution tres agressifs en nego."
+      },
+      "prochain_meeting": {
+        "date": "A planifier - debrief post-demo perso Michel",
+        "participants": "Ugo Muller (Mayday) + Cedric Kuhn (InfoMil)",
+        "topic": "Debrief retour demo Michel Itie + definition next steps + lancement business case / ROI",
+        "objectif": "Obtenir le feedback de Michel, savoir si le projet est priorise, avancer sur chiffrage pour presentation Denis (DG).",
+        "status": "A planifier - Cedric devait faire un mail apres debrief interne"
+      },
+      "stakeholders": [
+        {
+          "nom": "Cedric Kuhn",
+          "role": "Responsable Support Infrastructure & Infogerance - Porteur du projet cote InfoMil",
+          "influence": "Champion",
+          "position": "Favorable",
+          "linkedin": "https://www.linkedin.com/in/cedric-kuhn-13386345/",
+          "raison": "Convaincu par la solution Knowledge, moteur du projet en interne. Briefé sur la culture nego Leclerc, tres collaboratif avec Ugo."
+        },
+        {
+          "nom": "Fatima Ezara Nassiri",
+          "role": "Responsable equipe ingenieurs support - Adjointe de Cedric, experte technique",
+          "linkedin": "",
+          "influence": "Champion",
+          "position": "Favorable",
+          "raison": "Presente sur tous les calls, participe activement a la co-construction de la demo perso."
+        },
+        {
+          "nom": "Michel Itie",
+          "role": "Directeur de la Transformation - Directeur sponsor IA interne et solutions metiers",
+          "influence": "Décideur",
+          "position": "Favorable",
+          "linkedin": "https://www.linkedin.com/in/michel-itie-7563247/",
+          "raison": "A demande la demo personnalisee, interesse par la transversalite KB + Academy + RH/DVRH. Souleve la question de la maturite orga sur la gouvernance de la donnee comme frein potentiel."
+        },
+        {
+          "nom": "Denis Dargelos",
+          "role": "Directeur General - Decisionnaire final / negociateur",
+          "influence": "Décideur",
+          "position": "Inconnu",
+          "linkedin": "https://www.linkedin.com/in/denisdargelos/",
+          "raison": "Mentionne comme le negociateur final sur les gros contrats. Culture grande distribution Leclerc : nego tres agressive. Pas encore contacte par Mayday."
+        },
+        {
+          "nom": "Herve Ducouret",
+          "role": "Responsable Informatique Interne (DSI de fait)",
+          "linkedin": "",
+          "influence": "Décideur",
+          "position": "Neutre",
+          "raison": "Present a la demo finale. Niveau de connaissance Mayday zero avant la demo. Sera implique dans la nego avec Denis."
+        },
+        {
+          "nom": "Christophe Culaurier",
+          "role": "Responsable Support Metier",
+          "linkedin": "",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "raison": "A pose des questions pertinentes sur la generation d'articles depuis les tickets. Interesse par les cas d'usage IA."
+        },
+        {
+          "nom": "Cathy Etienne",
+          "role": "Direction adjacente - probablement DRH",
+          "linkedin": "",
+          "influence": "Utilisateur",
+          "position": "Favorable",
+          "raison": "A pose des questions sur l'accompagnement a la mise en oeuvre. Semble engagee dans le projet."
+        }
+      ],
+      "meddpicc": {
+        "M": {
+          "status": "🟡",
+          "detail": "Enjeux identifies : turnover 30% support metier, temps montee en competence 6 mois, GED obsolete. Pas de chiffres ROI formalises. Business case non encore construit."
+        },
+        "E": {
+          "status": "🟡",
+          "detail": "Michel Itie (Dir. Transfo) identifie comme decisionnaire intermediaire. Denis Dargelos (DG) est le signataire final. Herve Ducouret (DSI) implique dans la nego. Aucun contact direct avec Denis a ce stade."
+        },
+        "D1": {
+          "status": "🟡",
+          "detail": "Criteres exprimes : solution franco-francaise, hebergement France/Europe, SSO/Azure/OpenID, gouvernance granulaire, accompagnement methodologique. POC demande par Christophe (risque a gerer)."
+        },
+        "D2": {
+          "status": "🟡",
+          "detail": "Processus identifie : debrief interne InfoMil > audit flash + atelier Toulouse > business case + chiffrage > presentation Denis. Budget ouvert. Timeline Q4 2026."
+        },
+        "P": {
+          "status": "❌",
+          "detail": "Aucune information sur le paper process. DSI (Herve) et Denis Dargelos probablement impliques. Aucune mention de procurement ou juridique."
+        },
+        "I": {
+          "status": "✅",
+          "detail": "Douleurs clairement identifiees : connaissance dispersee, pas de gouvernance, GED a refondre, temps de montee en competence 6 mois, turnover 30% support metier."
+        },
+        "C1": {
+          "status": "✅",
+          "detail": "Double champion solide : Cedric Kuhn (initiateur) + Fatima Ezara Nassiri (experte technique). Michel Itie est un sponsor de niveau direction - favorable mais prudent."
+        },
+        "C2": {
+          "status": "❌",
+          "detail": "Aucun concurrent identifie ou mentionne dans les calls. Cedric a spontanement positionne Mayday comme leader francais. Risque de mise en competition lors de la presentation a Denis non evalue."
+        }
+      },
+      "dernier_call": {
+        "date": "Juin 2026",
+        "duree": "1h25",
+        "participants": "Ugo Muller (Mayday), Michel Itie (Dir. Transfo), Herve Ducouret (DSI), Cathy Etienne, Christophe Culaurier, Fatima Ezara Nassiri",
+        "sujets": "Demo personnalisee Mayday Knowledge + Academy sur contenus InfoMil. Presentation a Michel pour la premiere fois. Questions techniques (SSO, Azure, gouvernance, data center). Discussion POC vs atelier. Next steps budget et chiffrage.",
+        "points_cles": "Michel : on percoit bien la valeur mais veut ne pas bruler les etapes. Demande audit + atelier Toulouse + business case. Christophe demande un POC (gere par Ugo : Mayday ne fait pas de POC). Budget ouvert. Michel doit debriefer en interne avant de donner suite.",
+        "next_steps": "1. Mail recap Ugo avec enregistrement. 2. Debrief interne InfoMil (Michel). 3. Point de synchro Mayday/InfoMil sur suite. 4. Planification audit flash + atelier Toulouse. 5. Business case + chiffrage. 6. Presentation Denis."
+      },
+      "next_steps": {
+        "immediat": [
+          "Envoyer le mail recap post-demo avec enregistrement et les 3 next steps convenus",
+          "Relancer Michel Itie pour connaitre l'issue du debrief interne",
+          "Proposer des dates pour l'audit flash + atelier sur site Toulouse"
+        ],
+        "court_terme": [
+          "Organiser l'audit flash sur site (1 journee Toulouse) avec Michel, Cathy, Herve, Christophe",
+          "Preparer le business case avec les donnees perimetre collectees (200 agents, 6 mois montee en competence, turnover 30%)",
+          "Qualifier Denis : role exact, canal d'acces, niveau de preparation requis"
+        ],
+        "moyen_terme": [
+          "Presenter le chiffrage et le ROI a Michel + Herve",
+          "Organiser la presentation a Denis via Michel",
+          "Gerer la negociation avec Denis (et probablement Herve DSI)"
+        ]
+      },
+      "coaching": {
+        "bien_marche": [
+          "Demo personnalisee tres bien recue - contenus InfoMil integres, arborescence proposee, agent IA demontre sur cas reels",
+          "Double champion solide construit sur la duree (Cedric + Fatima) avant la demo direction",
+          "Gestion du sujet POC professionnelle : refus assume avec argumentation claire et alternative (atelier)",
+          "Michel engage : ca repond a mon attente - seduit par la valeur percue",
+          "Progression methodique : discovery > demo standard > demo Academy > briefing > demo personnalisee direction"
+        ],
+        "a_ameliorer": [
+          "Denis n'est pas encore dans la boucle - 6 calls et aucun contact avec le signataire final. C'est le risque #1 du deal.",
+          "Le next step de fin de demo est flou : on se refera un petit point dans quelques jours - pas de date ferme",
+          "Pricing/enveloppe jamais aborde avec Michel. Il demande a pouvoir mettre dans un previsionnel mais aucun premier chiffre donne",
+          "Christophe Culaurier est un risque sous-evalue : il demande un POC, est sceptique sur l'echelle",
+          "Ugo parle encore trop dans certains calls. Le ratio parole reste trop eleve cote AE"
+        ],
+        "actions_prioritaires": [
+          "URGENT : Envoyer le mail recap dans les 24h avec les 3 next steps dates",
+          "Appeler Michel sous 5 jours pour connaitre l'issue du debrief interne - ne pas attendre un mail",
+          "Qualifier Denis : demander a Cedric ou Michel le meilleur angle pour l'approcher",
+          "Traiter l'objection POC de Christophe Culaurier en lui envoyant des cas clients similaires",
+          "Proposer une date concrete pour l'atelier Toulouse des la relance"
+        ],
+        "risques": [
+          "Denis (DG) est le signataire et n'a pas encore ete touche - risque de veto ou de renegociation complete a la derniere etape",
+          "Priorite du projet incertaine - Michel doit debriefer en interne, le projet peut etre deprioritise",
+          "Christophe Culaurier peut bloquer sur l'absence de POC",
+          "Periode estivale juillet-aout peut faire glisser le closing vers Q1 2027",
+          "Competition non identifiee - Denis peut introduire un concurrent lors de la phase de chiffrage"
+        ],
+        "questions_prochain_call": [
+          "Michel, suite a votre debrief interne, est-ce que le projet base de connaissances est identifie comme une priorite pour l'exercice en cours ?",
+          "Quelle est la meilleure facon de preparer la presentation a Denis ?",
+          "Sur le perimetre de demarrage, quel serait le premier departement ou use case a forte valeur ajoutee ?",
+          "Herve, sur la partie technique (SSO, provisioning, gouvernance), avez-vous des contraintes IT specifiques ?",
+          "Christophe, votre preoccupation sur le passage a l'echelle est legitime - est-ce que des retours clients sur des bases a 10 000+ contenus vous aideraient ?"
+        ]
+      }
+    },
+    "notes": null
+  }
+];
+
+function checkAuth() {
+  const val = document.getElementById('auth-input').value;
+  if (val === PASSWORD) {
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    init();
+  } else {
+    document.getElementById('auth-error').style.display = 'block';
+    document.getElementById('auth-input').value = '';
+    document.getElementById('auth-input').focus();
+  }
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  if (!iso) return 'N/A';
+  try { return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+  catch(e) { return iso; }
+}
+function fmtAmt(n) {
+  if (!n) return '—';
+  return Number(n).toLocaleString('fr-FR')+'€';
+}
+function stageColor(s) {
+  const v = (s||'').toLowerCase();
+  if (v.includes('gagn') || v.includes('clos')) return 'badge-green';
+  if (v.includes('perdu')) return 'badge-red';
+  if (v.includes('propos') || v.includes('negoc')) return 'badge-amber';
+  return 'badge-blue';
+}
+function meddScore(deal) {
+  const m = deal.generated?.meddpicc||{};
+  let s = 0;
+  Object.values(m).forEach(v => {
+    if (v.status==='✅') s++;
+    else if (v.status==='🟡') s+=.5;
+  });
+  return Math.round(s*10)/10;
+}
+
+function init() {
+  // Last update
+  const dates = DEALS.map(d => d.updated_at).filter(Boolean).sort().reverse();
+  if (dates[0]) document.getElementById('last-update').textContent = 'MàJ ' + fmtDate(dates[0]);
+
+  // Pipeline sub
+  const total = DEALS.reduce((a,d) => a + (d.amount||0), 0);
+  document.getElementById('pipeline-sub').textContent = `${DEALS.length} deals actifs — Pipeline total : ${fmtAmt(total)}`;
+
+  // KPIs
+  const totalPipe = DEALS.reduce((a,d) => a + (d.amount||0), 0);
+  const avgMedd = DEALS.reduce((a,d) => a + meddScore(d), 0) / DEALS.length;
+  const byStage = {};
+  DEALS.forEach(d => { byStage[d.stage] = (byStage[d.stage]||0) + 1; });
+  const topStage = Object.entries(byStage).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-value">${fmtAmt(totalPipe)}</div><div class="kpi-label">Pipeline total ARR</div></div>
+    <div class="kpi"><div class="kpi-value">${DEALS.length}</div><div class="kpi-label">Deals actifs</div></div>
+    <div class="kpi"><div class="kpi-value">${avgMedd.toFixed(1)}/8</div><div class="kpi-label">Score MEDDPICC moyen</div></div>
+    <div class="kpi"><div class="kpi-value">${fmtAmt(Math.round(totalPipe/DEALS.length))}</div><div class="kpi-label">Deal size moyen</div></div>
+  `;
+
+  // Deals
+  document.getElementById('deals-list').innerHTML = DEALS.map((d,i) => buildDealCard(d,i)).join('');
+}
+
+function toggleDeal(i) {
+  const body = document.getElementById('deal-body-'+i);
+  const icon = document.getElementById('deal-icon-'+i);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  icon.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) showTab(i, 'overview');
+}
+
+function showTab(dealIdx, tab) {
+  ['overview','coaching','stakeholders','nextsteps'].forEach(t => {
+    const panel = document.getElementById(`panel-${dealIdx}-${t}`);
+    const tabEl = document.getElementById(`tab-${dealIdx}-${t}`);
+    if (panel) panel.classList.toggle('active', t===tab);
+    if (tabEl) tabEl.classList.toggle('active', t===tab);
+  });
+}
+
+function toggleSec(el) {
+  const body = el.nextElementSibling;
+  const icon = el.querySelector('.ti-chevron-down');
+  if (!body) return;
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  if (icon) icon.style.transform = hidden ? '' : 'rotate(-90deg)';
+}
+
+function buildDealCard(d, i) {
+  const score = meddScore(d);
+  const pct = Math.round((score/8)*100);
+  const g = d.generated || {};
+  const snap = g.snapshot || {};
+  const meet = g.prochain_meeting || {};
+  const medc = g.meddpicc || {};
+  const stk = g.stakeholders || [];
+  const ns = g.next_steps || {};
+  const coach = g.coaching || {};
+  const last = g.dernier_call || {};
+
+  const MKEYS = [
+    {k:'M',l:'Metrics'},{k:'E',l:'Economic Buyer'},{k:'D1',l:'Decision Criteria'},
+    {k:'D2',l:'Decision Process'},{k:'P',l:'Paper Process'},
+    {k:'I',l:'Identify Pain'},{k:'C1',l:'Champion'},{k:'C2',l:'Competition'}
+  ];
+
+  function coachBlock(items, cls, icon, title) {
+    if (!items?.length) return '';
+    return `<div class="coach-block ${cls}">
+      <div class="coach-title"><i class="ti ti-${icon}"></i>${title}</div>
+      ${items.map(s=>`<div class="coach-item"><span class="coach-dot"></span><span>${esc(s)}</span></div>`).join('')}
+    </div>`;
+  }
+
+  return `
+<div class="deal-card">
+  <div class="deal-header" onclick="toggleDeal(${i})">
+    <div style="flex:1">
+      <div class="deal-company">${esc(d.company)}</div>
+      <div class="deal-meta">
+        <span class="badge ${stageColor(d.stage)}">${esc(d.stage||'—')}</span>
+        <span class="deal-meta-item"><i class="ti ti-calendar" style="font-size:12px"></i>Closing ${fmtDate(d.closing_date)}</span>
+        ${d.hubspot_url?`<a href="${esc(d.hubspot_url)}" onclick="event.stopPropagation()" target="_blank" style="font-size:12px;color:var(--blue);display:flex;align-items:center;gap:3px"><i class="ti ti-external-link" style="font-size:12px"></i>HubSpot</a>`:''}
+      </div>
+      <div style="margin-top:8px;max-width:180px">
+        <div class="score-label">MEDDPICC ${score}/8</div>
+        <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="text-align:right">
+        <div class="deal-amount">${fmtAmt(d.amount)}</div>
+        <div class="deal-amount-label">ARR/an</div>
+      </div>
+      <i class="ti ti-chevron-down" id="deal-icon-${i}" style="font-size:18px;color:var(--text2);transition:transform .2s"></i>
+    </div>
+  </div>
+  <div class="deal-body" id="deal-body-${i}">
+    <div class="deal-tabs">
+      <div class="deal-tab" id="tab-${i}-overview" onclick="showTab(${i},'overview')">Overview</div>
+      <div class="deal-tab" id="tab-${i}-coaching" onclick="showTab(${i},'coaching')">Coaching</div>
+      <div class="deal-tab" id="tab-${i}-stakeholders" onclick="showTab(${i},'stakeholders')">Stakeholders</div>
+      <div class="deal-tab" id="tab-${i}-nextsteps" onclick="showTab(${i},'nextsteps')">Next Steps</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="deal-panel" id="panel-${i}-overview">
+      <div class="sec">
+        <div class="sec-head" onclick="toggleSec(this)"><span class="sec-title">Snapshot</span><i class="ti ti-chevron-down"></i></div>
+        <div class="sec-body">
+          ${[['Montant','montant'],['Licences','licences'],['Produits','produits'],['Populations','populations'],['Stage','stage'],['Probabilité','probability'],['Timeline','timeline'],['Compelling event','compelling_event'],['Solutions actuelles','solutions_actuelles'],['Compétition','competition']].map(([l,k])=>`
+          <div class="snap-row"><div class="snap-key">${l}</div><div>${esc(snap[k]||'—')}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head" onclick="toggleSec(this)"><span class="sec-title">MEDDPICC</span><i class="ti ti-chevron-down"></i></div>
+        <div class="sec-body">
+          <div class="medc-grid">
+          ${MKEYS.map(({k,l})=>`
+          <div class="medc-item">
+            <div class="medc-top"><span class="medc-status">${medc[k]?.status||'❌'}</span><div><div class="medc-name">${k.replace(/[12]/,'')} <span style="font-weight:400;color:var(--text2)">${l}</span></div></div></div>
+            <div class="medc-detail">${esc(medc[k]?.detail||'Non renseigné')}</div>
+          </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head" onclick="toggleSec(this)"><span class="sec-title">Prochain meeting</span><i class="ti ti-chevron-down"></i></div>
+        <div class="sec-body">
+          <div class="meet-grid">
+            <div class="meet-item"><div class="meet-label">Date</div><div class="meet-val">${esc(meet.date||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Participants</div><div class="meet-val">${esc(meet.participants||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Topic</div><div class="meet-val">${esc(meet.topic||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Objectif</div><div class="meet-val">${esc(meet.objectif||'—')}</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head" onclick="toggleSec(this)"><span class="sec-title">Dernier call</span><i class="ti ti-chevron-down"></i></div>
+        <div class="sec-body">
+          <div class="meet-grid" style="margin-bottom:12px">
+            <div class="meet-item"><div class="meet-label">Date</div><div class="meet-val">${esc(last.date||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Durée</div><div class="meet-val">${esc(last.duree||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Participants</div><div class="meet-val">${esc(last.participants||'—')}</div></div>
+            <div class="meet-item"><div class="meet-label">Sujets</div><div class="meet-val">${esc(last.sujets||'—')}</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500">Points clés</div>
+          <div style="font-size:13px;line-height:1.6">${esc(last.points_cles||'—')}</div>
+          <div style="font-size:12px;color:var(--text2);margin:10px 0 4px;font-weight:500">Next steps engagés</div>
+          <div style="font-size:13px;line-height:1.6">${esc(last.next_steps||'—')}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COACHING -->
+    <div class="deal-panel" id="panel-${i}-coaching">
+      ${coachBlock(coach.bien_marche,'success','circle-check','Ce qui a bien marché')}
+      ${coachBlock(coach.a_ameliorer,'warning','alert-triangle','Ce qui aurait pu être mieux')}
+      ${coachBlock(coach.actions_prioritaires,'info','list-check','Actions prioritaires')}
+      ${coachBlock(coach.risques,'danger','alert-circle','Risques à adresser')}
+      ${coachBlock(coach.questions_prochain_call,'','message-question','Questions à poser au prochain call')}
+    </div>
+
+    <!-- STAKEHOLDERS -->
+    <div class="deal-panel" id="panel-${i}-stakeholders">
+      <div class="stk-grid">
+      ${stk.map(s=>{
+        const pc = s.position==='Favorable'?'badge-green':s.position==='Défavorable'?'badge-red':'badge-gray';
+        const ic = (s.influence==='Décideur'||s.influence==='Champion')?'badge-blue':'badge-gray';
+        return `<div class="stk-card">
+          <div class="stk-name">${esc(s.nom||'Inconnu')}</div>
+          <div class="stk-role">${esc(s.role||'')}</div>
+          <div class="stk-badges">
+            <span class="badge ${ic}">${esc(s.influence||'?')}</span>
+            <span class="badge ${pc}">${esc(s.position||'Inconnu')}</span>
+          </div>
+          ${s.linkedin?`<a href="${esc(s.linkedin)}" target="_blank" style="font-size:11px;color:var(--blue);display:inline-flex;align-items:center;gap:3px"><i class="ti ti-external-link" style="font-size:11px"></i>LinkedIn</a>`:''}
+          <div class="stk-reason">${esc(s.raison||'')}</div>
+        </div>`;
+      }).join('')}
+      ${stk.length===0?'<p style="font-size:13px;color:var(--text2)">Aucun stakeholder identifié.</p>':''}
+      </div>
+    </div>
+
+    <!-- NEXT STEPS -->
+    <div class="deal-panel" id="panel-${i}-nextsteps">
+      <div class="ns-group"><span class="ns-label imm">Immédiat</span>
+        ${(ns.immediat||[]).map(s=>`<div class="ns-item"><span style="color:var(--red);font-size:16px;margin-top:-1px">•</span>${esc(s)}</div>`).join('')}
+      </div>
+      <div class="ns-group"><span class="ns-label ct">Court terme</span>
+        ${(ns.court_terme||[]).map(s=>`<div class="ns-item"><span style="color:var(--amber);font-size:16px;margin-top:-1px">•</span>${esc(s)}</div>`).join('')}
+      </div>
+      <div class="ns-group"><span class="ns-label mt">Moyen terme</span>
+        ${(ns.moyen_terme||[]).map(s=>`<div class="ns-item"><span style="color:var(--text2);font-size:16px;margin-top:-1px">•</span>${esc(s)}</div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+</script>
+</body>
+</html>
